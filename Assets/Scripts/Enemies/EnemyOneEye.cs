@@ -32,12 +32,15 @@ public class EnemyOneEye : MonoBehaviour
     {
         player = GameObject.Find("Player").transform;
         hp = max_hp;
-        Vector2 direction = (player.transform.position - transform.position).normalized;
         GameManager.Instance.enemies.Add(this.gameObject);
     }
 
     private void Update() {
+        if (player == null) return;
+        // 매 프레임 플레이어 방향으로 재조준해 추적한다. (기존엔 direction이 항상 0이라 제자리에 멈춰 있었음)
+        direction = (player.transform.position - transform.position).normalized;
         transform.position += direction * speed * Time.deltaTime;
+        AvoidOverlapping();
     }
 
     private void AvoidOverlapping() {
@@ -82,11 +85,13 @@ public class EnemyOneEye : MonoBehaviour
         }
 
         // Delete this enemy
+        GameManager.Instance.enemies.Remove(gameObject);
         Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
         if (other.gameObject.tag == "basicAttack") {
+            if (Player.Instance == null) return;
             hp  -= Player.Instance.calculateWeaponDamage();
             if (hp <= 0) {
                 Die();

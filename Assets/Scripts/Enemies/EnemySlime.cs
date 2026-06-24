@@ -89,11 +89,13 @@ public class EnemySlime : MonoBehaviour
         }
 
         // Delete this enemy
+        GameManager.Instance.enemies.Remove(gameObject);
         Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
         if (other.gameObject.tag == "basicAttack") {
+            if (Player.Instance == null) return;
             hp  -= Player.Instance.calculateWeaponDamage();
             if (hp <= 0) {
                 Die();

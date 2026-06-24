@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.AI;
 
 public class EnemySpider : MonoBehaviour
 {
@@ -11,9 +10,6 @@ public class EnemySpider : MonoBehaviour
     public float damage;
     private const float speed = 1.5f;
     
-    [SerializeField]
-    private float stunDuration;
-    //{0.3f, 0.5f, 0.7f, 1f};
 
     // player을 따라가기 위해 필요한 변수들
     private Transform player;
@@ -91,11 +87,13 @@ public class EnemySpider : MonoBehaviour
         }
 
         // Delete this enemy
+        GameManager.Instance.enemies.Remove(gameObject);
         Destroy(gameObject);
     }
 
     private void OnTriggerEnter2D(Collider2D other) {
         if (other.gameObject.tag == "basicAttack") {
+            if (Player.Instance == null) return;
             hp  -= Player.Instance.calculateWeaponDamage();
             if (hp <= 0) {
                 Die();

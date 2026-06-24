@@ -11,6 +11,7 @@ TagManager:
   - Enemy_Slime
   - Enemy_OneEye
   - Gold
+  - Enemy_Boss
   layers:
   - Default
   - TransparentFX

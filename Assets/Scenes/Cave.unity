@@ -8458,7 +8458,8 @@ MonoBehaviour:
   - {fileID: 503852834812619048, guid: 4479092803c26924e845dbcab364da4c, type: 3}
   - {fileID: 8434915571548572093, guid: f3025408f73a1d743aba8ec04d2e1f50, type: 3}
   - {fileID: 2825783988511943243, guid: 7a503c0618342fc4b9ed1df2f7935cad, type: 3}
-  bosseEnemies: []
+  bosseEnemies:
+  - {fileID: 3976649941253921417, guid: 42866b41cd1d95048bcbc5a1fe82a0dd, type: 3}
 --- !u!1 &525397294
 GameObject:
   m_ObjectHideFlags: 0
@@ -18999,7 +19000,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   variableJoystick: {fileID: 958661281319999695}
-  basic_attack: []
+  basic_attack:
+  - {fileID: 7882089386251021502, guid: 94c0cc3729c9184418ba852aba865473, type: 3}
   basic_attack_level: 0
   fire_barrier: []
   fire_barrier_level: 0

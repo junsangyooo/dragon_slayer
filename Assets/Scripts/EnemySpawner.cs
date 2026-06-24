@@ -30,6 +30,9 @@ public class EnemySpawner : MonoBehaviour
     private float countTime;
     private int level;
     private float reduceSpawnTime;
+    private const float bossTime = 180f; // 보스 등장 시간(초). 이 시간까지 생존하면 보스 출현.
+    private bool bossSpawned = false;
+    private bool bossActive = false;
 
     private Vector3[] DiagonalPosition = {new Vector3(maxSpawnX, maxSpawnY, 0f), 
                                                 new Vector3(maxSpawnX, minSpawnY, 0f), 
@@ -57,7 +60,15 @@ public class EnemySpawner : MonoBehaviour
         while (GameManager.Instance.GetPlaying()) {
             yield return new WaitForSeconds(1f);
             countTime += 1;
-            if (countTime % 180 == 0 && level < 3)  {
+            // 생존 목표 시간 도달 -> 보스 1회 등장, 이후 일반 적 스폰 중단
+            if (!bossSpawned && countTime >= bossTime) {
+                SpawnBoss();
+                bossSpawned = true;
+                bossActive = true;
+            }
+            if (bossActive) continue;
+            // 45초마다 난이도 상승: 3분(보스 전)까지 tier 0->1->2->3 으로 적이 강해지고 스폰도 빨라진다.
+            if (countTime % 45 == 0 && level < 3)  {
                 level++;
                 reduceSpawnTime = level * 2;
             }
@@ -66,7 +77,6 @@ public class EnemySpawner : MonoBehaviour
             if (countTime % (23 - reduceSpawnTime) == 0) SpawnSlimes();
             if (countTime % (37 - reduceSpawnTime) == 0) {
                 SpawnOneEye();
-                SpawnBoss();
             }
         }
     }
@@ -99,6 +109,29 @@ public class EnemySpawner : MonoBehaviour
     }
 
     private void SpawnBoss() {
-        
+        if (bosseEnemies == null || bosseEnemies.Length == 0) return;
+        GameObject prefab = bosseEnemies[0];
+        if (prefab == null) return;
+
+        GameObject boss = Instantiate(prefab, new Vector3(0f, 8f, 0f), SpawnRotation);
+
+        // 이 프리팹은 3D BoxCollider라 2D 물리와 상호작용하지 않는다 -> 제거 후 2D 트리거로 교체.
+        BoxCollider old3d = boss.GetComponent<BoxCollider>();
+        if (old3d != null) Destroy(old3d);
+        BoxCollider2D col = boss.GetComponent<BoxCollider2D>();
+        if (col == null) col = boss.AddComponent<BoxCollider2D>();
+        col.isTrigger = true;
+        col.size = new Vector2(0.39f, 0.56f);
+        col.offset = new Vector2(0.36f, -0.18f);
+
+        // 트리거 콜백이 확실히 발동하도록 Rigidbody2D 추가(다른 적과 동일 패턴).
+        Rigidbody2D rb = boss.GetComponent<Rigidbody2D>();
+        if (rb == null) rb = boss.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = 0f;
+        rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+        boss.tag = "Enemy_Boss";
+        if (boss.GetComponent<EnemyBoss>() == null) boss.AddComponent<EnemyBoss>();
     }
 }
