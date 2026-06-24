@@ -94,6 +94,124 @@ public class WeaponsAndBuffs : MonoBehaviour
         basic_attack_level++;
     }
 
+    // ===================== 추가 무기 (레벨업 카드로 획득·강화) =====================
+    private FireBarrier fireBarrierInstance;
+
+    // --- Fire Barrier: 플레이어 주위 지속 피해 오라 ---
+    public void UpgradeFireBarrier() {
+        fire_barrier_level++;
+        if (fireBarrierInstance == null) {
+            GameObject go = WeaponVisuals.SpawnCircle(transform.position, 3f, new Color(1f, 0.45f, 0.1f, 0.22f), -2);
+            fireBarrierInstance = go.AddComponent<FireBarrier>();
+            fireBarrierInstance.target = transform;
+        }
+        fireBarrierInstance.radius = 1.4f + 0.35f * fire_barrier_level;
+        fireBarrierInstance.damage = 1f + fire_barrier_level;
+    }
+
+    // --- Thunder: 주기적으로 적에게 낙뢰 ---
+    public void UpgradeThunder() {
+        thunder_level++;
+        if (thunder_level == 1) StartCoroutine(ThunderLoop());
+    }
+    private IEnumerator ThunderLoop() {
+        while (true) {
+            float interval = Mathf.Max(0.6f, 1.8f - 0.12f * thunder_level);
+            yield return new WaitForSeconds(interval);
+            if (GameManager.Instance == null || !GameManager.Instance.GetPlaying() || thunder_level <= 0) continue;
+            int strikes = Mathf.Max(1, thunder_level);
+            float dmg = 3f + 2f * thunder_level;
+            for (int i = 0; i < strikes; i++) {
+                Vector3 pos = RandomTargetPos();
+                GameObject fx = WeaponVisuals.SpawnCircle(pos, 1.6f, new Color(1f, 0.95f, 0.3f, 0.85f), 5);
+                fx.AddComponent<FadeAndDie>().life = 0.22f;
+                WeaponVisuals.DamageInRadius(pos, 1.1f, dmg);
+            }
+        }
+    }
+
+    // --- Black Hole: 주기적으로 블랙홀 생성(끌어당김 + 지속 피해) ---
+    public void UpgradeBlackHole() {
+        black_hole_level++;
+        if (black_hole_level == 1) StartCoroutine(BlackHoleLoop());
+    }
+    private IEnumerator BlackHoleLoop() {
+        while (true) {
+            float interval = Mathf.Max(3.5f, 6f - 0.3f * black_hole_level);
+            yield return new WaitForSeconds(interval);
+            if (GameManager.Instance == null || !GameManager.Instance.GetPlaying() || black_hole_level <= 0) continue;
+            float radius = 2f + 0.3f * black_hole_level;
+            Vector3 pos = RandomTargetPos();
+            GameObject go = WeaponVisuals.SpawnCircle(pos, radius * 2f, new Color(0.35f, 0.1f, 0.5f, 0.55f), -1);
+            BlackHole bh = go.AddComponent<BlackHole>();
+            bh.radius = radius;
+            bh.damage = 1f + black_hole_level;
+            bh.lifetime = 2.2f + 0.3f * black_hole_level;
+        }
+    }
+
+    // --- Horn Wave: 주기적으로 조준 방향에 관통 검기 발사 ---
+    public void UpgradeHornWave() {
+        horn_wave_level++;
+        if (horn_wave_level == 1) StartCoroutine(HornWaveLoop());
+    }
+    private IEnumerator HornWaveLoop() {
+        while (true) {
+            float interval = Mathf.Max(1.2f, 2.5f - 0.12f * horn_wave_level);
+            yield return new WaitForSeconds(interval);
+            if (GameManager.Instance == null || !GameManager.Instance.GetPlaying() || horn_wave_level <= 0) continue;
+            int waves = Mathf.Clamp(horn_wave_level, 1, 5);
+            float dmg = 4f + 2f * horn_wave_level;
+            Vector3 aim = GetAimDirection();
+            const float spread = 18f;
+            float start = -(waves - 1) * spread * 0.5f;
+            for (int i = 0; i < waves; i++) {
+                Vector3 dir = Quaternion.Euler(0f, 0f, start + i * spread) * aim;
+                SpawnHornWave(dir, dmg);
+            }
+        }
+    }
+    private void SpawnHornWave(Vector3 dir, float dmg) {
+        GameObject go = new GameObject("HornWave");
+        go.transform.position = transform.position;
+        float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        go.transform.rotation = Quaternion.Euler(0f, 0f, ang);
+        go.transform.localScale = new Vector3(1.1f, 0.5f, 1f); // 가로로 넓은 검기 형태
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = WeaponVisuals.Circle();
+        sr.color = new Color(0.7f, 0.95f, 1f, 0.9f);
+        sr.sortingOrder = 4;
+        BoxCollider2D col = go.AddComponent<BoxCollider2D>();
+        col.isTrigger = true;
+        col.size = Vector2.one;
+        Rigidbody2D rb = go.AddComponent<Rigidbody2D>();
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        rb.gravityScale = 0f;
+        DamageProjectile p = go.AddComponent<DamageProjectile>();
+        p.dir = dir.normalized;
+        p.moveSpeed = 7f;
+        p.damage = dmg;
+        p.lifetime = 1.3f;
+    }
+
+    // 살아있는 적 중 무작위 하나의 위치(없으면 플레이어 주변 무작위 지점)
+    private Vector3 RandomTargetPos() {
+        GameObject e = RandomEnemy();
+        if (e != null) return e.transform.position;
+        Vector2 off = Random.insideUnitCircle * 4f;
+        return transform.position + new Vector3(off.x, off.y, 0f);
+    }
+    private GameObject RandomEnemy() {
+        if (GameManager.Instance == null) return null;
+        List<GameObject> list = GameManager.Instance.enemies;
+        List<GameObject> alive = new List<GameObject>();
+        for (int i = 0; i < list.Count; i++) {
+            if (list[i] != null) alive.Add(list[i]);
+        }
+        if (alive.Count == 0) return null;
+        return alive[Random.Range(0, alive.Count)];
+    }
+
     private void Start() {
         direction = new Vector3(0f, 1f, 0f);
         if (basic_attack_level < 1) basic_attack_level = 1; // 시작부터 파이어볼 1발

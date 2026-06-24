@@ -70,12 +70,36 @@ public class UpgradeManager : MonoBehaviour
         WeaponsAndBuffs wab = (p != null) ? p.GetComponent<WeaponsAndBuffs>() : null;
         pool.Clear();
 
-        // --- 무기: 파이어볼 (지금 작동하는 유일한 무기) ---
+        // --- 무기 ---
         pool.Add(new Upgrade
         {
             name = "FIREBALL", iconLabel = "FIRE", color = new Color(1f, 0.5f, 0.12f), maxLevel = 6,
             desc = lv => "Fires " + lv + " fireball" + (lv == 1 ? "" : "s") + "\nat the nearest enemy.",
             apply = () => { if (wab != null) wab.UpgradeFireball(); }
+        });
+        pool.Add(new Upgrade
+        {
+            name = "FIRE BARRIER", iconLabel = "AURA", color = new Color(1f, 0.5f, 0.15f), maxLevel = 6,
+            desc = lv => "A burning aura damages\nnearby enemies (Lv." + lv + ")",
+            apply = () => { if (wab != null) wab.UpgradeFireBarrier(); }
+        });
+        pool.Add(new Upgrade
+        {
+            name = "THUNDER", iconLabel = "ZAP", color = new Color(0.95f, 0.9f, 0.3f), maxLevel = 6,
+            desc = lv => "Lightning strikes " + lv + " foe" + (lv == 1 ? "" : "s") + "\nperiodically",
+            apply = () => { if (wab != null) wab.UpgradeThunder(); }
+        });
+        pool.Add(new Upgrade
+        {
+            name = "BLACK HOLE", iconLabel = "VOID", color = new Color(0.6f, 0.35f, 0.85f), maxLevel = 5,
+            desc = lv => "Pulls in and crushes\nenemies (Lv." + lv + ")",
+            apply = () => { if (wab != null) wab.UpgradeBlackHole(); }
+        });
+        pool.Add(new Upgrade
+        {
+            name = "HORN WAVE", iconLabel = "SLASH", color = new Color(0.6f, 0.95f, 1f), maxLevel = 6,
+            desc = lv => { int w = Mathf.Clamp(lv, 1, 5); return "Fires " + w + " sword wave" + (w == 1 ? "" : "s"); },
+            apply = () => { if (wab != null) wab.UpgradeHornWave(); }
         });
 
         // --- 버프 9종 (Player 스탯에 직접 적용) ---

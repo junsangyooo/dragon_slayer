@@ -72,6 +72,10 @@ public class Player : MonoBehaviour
         facingRight = true;
         isDashing = false;
         dashAvailable = true;
+        // 로비 상점에서 구매한 영구 업그레이드 적용
+        max_health += MetaProgress.HpLevel * MetaProgress.HP_PER_LEVEL;
+        weapon_damage += MetaProgress.DmgLevel * MetaProgress.DMG_PER_LEVEL;
+        player_move_speed += MetaProgress.SpeedLevel * MetaProgress.SPEED_PER_LEVEL;
         current_health = max_health;
         wab.setAttackSpeed(attack_speed);
         wab.setCriticalDamage(critical_damage);
@@ -207,6 +211,7 @@ public class Player : MonoBehaviour
             }
         }
         if (other.gameObject.tag == "EXP") {
+            AudioManager.Instance.PlayPickup();
             current_exp += other.GetComponent<EXP>().exp_amount;
             while (current_exp >= max_exp) {
                 LevelUp();
@@ -215,12 +220,14 @@ public class Player : MonoBehaviour
             Destroy(other.gameObject);
         }
         if (other.gameObject.tag == "Gold") {
+            AudioManager.Instance.PlayPickup();
             GameManager.Instance.AddGold();
             Destroy(other.gameObject);
         }
     }
 
     private void WhenPlayerDamaged() {
+        AudioManager.Instance.PlayHurt();
         GameManager.Instance.UpdateHP();
         if (current_health <= 0) {
             PlayerDie();
@@ -244,6 +251,7 @@ public class Player : MonoBehaviour
     // EXP가 max_exp에 도달하면 레벨업: 넘친 EXP는 이월하고 다음 요구치를 올린다.
     // (실제 업그레이드 카드 선택은 UpgradeManager.QueueLevelUp이 처리한다.)
     private void LevelUp() {
+        AudioManager.Instance.PlayLevelUp();
         level++;
         current_exp -= max_exp;
         if (current_exp < 0) current_exp = 0;

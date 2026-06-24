@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EnemySpider : MonoBehaviour
+public class EnemySpider : MonoBehaviour, IDamageable
 {
     // Enemy 체력 및 공격력
     private float hp;
@@ -62,6 +62,7 @@ public class EnemySpider : MonoBehaviour
         }
     }
     private void Die() {
+        AudioManager.Instance.PlayDeath();
         // Dropping Energy
         int playTime = GameManager.Instance.getPlayTime();
         if (playTime < 60) level = 0;
@@ -94,10 +95,13 @@ public class EnemySpider : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other) {
         if (other.gameObject.tag == "basicAttack") {
             if (Player.Instance == null) return;
-            hp  -= Player.Instance.calculateWeaponDamage();
-            if (hp <= 0) {
-                Die();
-            }
+            TakeDamage(Player.Instance.calculateWeaponDamage());
         }
+    }
+
+    public void TakeDamage(float dmg) {
+        if (hp <= 0f) return;
+        hp -= dmg;
+        if (hp <= 0f) Die();
     }
 }

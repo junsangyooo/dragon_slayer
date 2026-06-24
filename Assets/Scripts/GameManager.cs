@@ -68,6 +68,7 @@ public class GameManager : MonoBehaviour
         playTime = 0;
         enemySpawner.StartSpawning();
         StartCoroutine("PlayTime");
+        AudioManager.Instance.StartBgm();
     }
 
     IEnumerator PlayTime() {
@@ -137,7 +138,9 @@ public class GameManager : MonoBehaviour
     public void GameOver() {
         if (isWin || isGameOver) return; // 이미 승리/게임오버면 중복 UI 방지 (같은 프레임 사망·보스처치 대비)
         isGameOver = true;
+        MetaProgress.AddGold(gold); // 이번 판에서 모은 골드를 영구 누적
         Pause();
+        AudioManager.Instance.PlayDefeat();
         ShowDefeat();
     }
 
@@ -145,8 +148,10 @@ public class GameManager : MonoBehaviour
     public void Win() {
         if (isWin || isGameOver) return;
         isWin = true;
+        MetaProgress.AddGold(gold); // 이번 판에서 모은 골드를 영구 누적
         playing = false; // 스포너/타이머 코루틴 종료
         Pause();         // 화면 고정 (UpgradeManager는 IsRunOver를 보고 timeScale을 건드리지 않음)
+        AudioManager.Instance.PlayVictory();
         ShowRunEndScreen("VICTORY!", new Color(1f, 0.85f, 0.3f));
     }
 
