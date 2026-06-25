@@ -49,7 +49,7 @@ The run always resolves in a win or a loss, then loops back to the lobby where b
 ## Features
 
 - **Auto-battler combat** — the player automatically fires at the nearest enemy on an attack-speed timer; the player focuses on positioning and dodging.
-- **Roguelike level-up drafting** — on level up, the game pauses and presents **3 random upgrade cards** drawn from a pool of **14** options (5 weapons + 9 stat buffs). The card UI is generated at runtime over a hand-crafted, transparent card frame.
+- **Roguelike level-up drafting** — on level up, the game pauses and presents **3 random upgrade cards** drawn from a pool of **14** options (5 weapons + 9 stat buffs). The card UI is generated at runtime over a custom transparent card frame.
 - **5 weapons**, each with its own behavior and scaling:
   | Weapon | Behavior |
   | --- | --- |
@@ -92,7 +92,7 @@ The codebase favors lightweight, self-bootstrapping systems so most UI and conte
 - **`IDamageable` interface** — every enemy and the boss implement `TakeDamage(float)`, so all weapons deal damage through one uniform path (`Physics2D.OverlapCircle` queries or trigger hits) regardless of enemy type.
 - **Runtime-generated UI** — the level-up cards, the victory/defeat screens, and the lobby shop are all built in code (`Canvas` + `CanvasScaler` + `GraphicRaycaster`), so they require no per-scene setup and can't break from missing Inspector references.
 - **Data-driven upgrade pool** — upgrades are defined as a code catalog (name, icon label, description, max level, apply-action), making the draft pool easy to extend.
-- **Procedural content** — weapon visuals are code-generated circle sprites and all audio clips are synthesized at runtime, keeping the project asset-light and Unity-editor-independent for logic changes.
+- **Runtime content** — weapon-effect sprites are loaded from `Resources` (tinting/scaling happens in code) and all audio clips are synthesized procedurally at runtime, so gameplay content needs little to no per-scene wiring.
 
 ## Project Structure
 
@@ -112,6 +112,7 @@ Assets/
 │  ├─ Weapons/              # IDamageable, WeaponVisuals, DamageProjectile, FireBarrier, BlackHole, FadeAndDie
 │  └─ Lobby/Main.cs         # main menu + runtime shop
 ├─ Resources/UI/            # upgrade card frame sprite (loaded at runtime)
+├─ Resources/Weapons/       # weapon-effect sprites (fire barrier, thunder, black hole, horn wave)
 ├─ Scenes/                  # Lobby.unity, Cave.unity
 ├─ Prefabs/                 # player, enemies, weapons, EXP/gold, lobby
 └─ Sprites/ , Assets2/      # art, UI kits, effect packs
@@ -132,7 +133,7 @@ git clone https://github.com/junsangyooo/dragon_slayer.git
 
 ## Roadmap
 
-- [ ] Replace code-generated weapon visuals and procedural audio with authored art/sound
+- [ ] Animate the (currently static) weapon-effect sprites and replace procedural audio with authored sound
 - [ ] Localized (Korean) UI text once a Korean TMP font is added
 - [ ] Continuous BGM across scene transitions
 - [ ] Refactor the four enemy scripts into a shared `EnemyBase`
