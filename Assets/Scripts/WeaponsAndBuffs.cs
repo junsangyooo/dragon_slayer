@@ -101,7 +101,7 @@ public class WeaponsAndBuffs : MonoBehaviour
     public void UpgradeFireBarrier() {
         fire_barrier_level++;
         if (fireBarrierInstance == null) {
-            GameObject go = WeaponVisuals.SpawnCircle(transform.position, 3f, new Color(1f, 0.45f, 0.1f, 0.22f), -2);
+            GameObject go = WeaponVisuals.SpawnSprite(WeaponVisuals.Fx("firebarrier"), transform.position, 3f, -2);
             fireBarrierInstance = go.AddComponent<FireBarrier>();
             fireBarrierInstance.target = transform;
         }
@@ -123,8 +123,8 @@ public class WeaponsAndBuffs : MonoBehaviour
             float dmg = 3f + 2f * thunder_level;
             for (int i = 0; i < strikes; i++) {
                 Vector3 pos = RandomTargetPos();
-                GameObject fx = WeaponVisuals.SpawnCircle(pos, 1.6f, new Color(1f, 0.95f, 0.3f, 0.85f), 5);
-                fx.AddComponent<FadeAndDie>().life = 0.22f;
+                GameObject fx = WeaponVisuals.SpawnSprite(WeaponVisuals.Fx("thunder"), pos, 2.4f, 5);
+                fx.AddComponent<FadeAndDie>().life = 0.28f;
                 WeaponVisuals.DamageInRadius(pos, 1.1f, dmg);
             }
         }
@@ -142,7 +142,7 @@ public class WeaponsAndBuffs : MonoBehaviour
             if (GameManager.Instance == null || !GameManager.Instance.GetPlaying() || black_hole_level <= 0) continue;
             float radius = 2f + 0.3f * black_hole_level;
             Vector3 pos = RandomTargetPos();
-            GameObject go = WeaponVisuals.SpawnCircle(pos, radius * 2f, new Color(0.35f, 0.1f, 0.5f, 0.55f), -1);
+            GameObject go = WeaponVisuals.SpawnSprite(WeaponVisuals.Fx("blackhole"), pos, radius * 2f, -1);
             BlackHole bh = go.AddComponent<BlackHole>();
             bh.radius = radius;
             bh.damage = 1f + black_hole_level;
@@ -176,10 +176,9 @@ public class WeaponsAndBuffs : MonoBehaviour
         go.transform.position = transform.position;
         float ang = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         go.transform.rotation = Quaternion.Euler(0f, 0f, ang);
-        go.transform.localScale = new Vector3(1.1f, 0.5f, 1f); // 가로로 넓은 검기 형태
+        go.transform.localScale = new Vector3(1.6f, 1.6f, 1f); // 초승달 검기 스프라이트
         SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = WeaponVisuals.Circle();
-        sr.color = new Color(0.7f, 0.95f, 1f, 0.9f);
+        sr.sprite = WeaponVisuals.Fx("hornwave");
         sr.sortingOrder = 4;
         BoxCollider2D col = go.AddComponent<BoxCollider2D>();
         col.isTrigger = true;

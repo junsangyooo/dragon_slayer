@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 // 무기/적이 공유하는 피해 인터페이스. 모든 적(Bat/Spider/Slime/OneEye/Boss)이 구현한다.
@@ -37,6 +38,33 @@ public static class WeaponVisuals
         tex.Apply();
         _circle = Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), size);
         return _circle;
+    }
+
+    private static Dictionary<string, Sprite> _fxCache;
+    // Resources/Weapons/<name> 텍스처를 1유닛 너비 스프라이트로 로드(캐시). 없으면 원으로 대체.
+    public static Sprite Fx(string name)
+    {
+        if (_fxCache == null) _fxCache = new Dictionary<string, Sprite>();
+        Sprite cached;
+        if (_fxCache.TryGetValue(name, out cached)) return cached;
+        Texture2D tex = Resources.Load<Texture2D>("Weapons/" + name);
+        Sprite sp = (tex != null)
+            ? Sprite.Create(tex, new Rect(0, 0, tex.width, tex.height), new Vector2(0.5f, 0.5f), tex.width)
+            : Circle();
+        _fxCache[name] = sp;
+        return sp;
+    }
+
+    // 지정 스프라이트로 시각효과 GameObject 생성(지름 diameter 유닛). 스프라이트는 1유닛 너비라 localScale=diameter.
+    public static GameObject SpawnSprite(Sprite sprite, Vector3 pos, float diameter, int order)
+    {
+        GameObject go = new GameObject("WeaponFX");
+        go.transform.position = pos;
+        go.transform.localScale = new Vector3(diameter, diameter, 1f);
+        SpriteRenderer sr = go.AddComponent<SpriteRenderer>();
+        sr.sprite = sprite;
+        sr.sortingOrder = order;
+        return go;
     }
 
     // 원형 시각효과 GameObject 하나를 만들어 반환(지름 diameter 유닛, 색 color, 정렬순서 order).
